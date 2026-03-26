@@ -37,11 +37,12 @@ export default function App() {
     <Router>
       <Routes>
         {/* Auth Routes */}
-        <Route path="/login" element={user ? <Navigate to="/" replace /> : <Login />} />
-        <Route path="/signup" element={user ? <Navigate to="/" replace /> : <Signup />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={user ? <Navigate to="/dashboard" replace /> : <Signup />} />
 
         {/* Protected CRM Routes */}
-        <Route path="/" element={
+        <Route path="/" element={<Navigate to="/login" replace />} />
+        <Route path="/dashboard" element={
           <ProtectedRoute>
             <Layout>
               <Dashboard />
@@ -148,7 +149,7 @@ export default function App() {
         } />
 
         {/* Fallback */}
-        <Route path="*" element={<Navigate to="/" replace />} />
+        <Route path="*" element={<Navigate to={user ? "/dashboard" : "/login"} replace />} />
       </Routes>
     </Router>
   );

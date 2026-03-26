@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
-import { Briefcase, Mail, Lock, ArrowRight } from 'lucide-react';
+import { Briefcase, Mail, Lock, ArrowRight, LayoutDashboard } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '@/hooks/useAuth';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -9,6 +10,7 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -24,7 +26,7 @@ export default function Login() {
       setError(error.message);
       setLoading(false);
     } else {
-      navigate('/');
+      navigate('/dashboard');
     }
   };
 
@@ -40,6 +42,29 @@ export default function Login() {
         </div>
 
         <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-200">
+          {user && (
+            <div className="mb-8 p-4 bg-indigo-50 border border-indigo-100 rounded-xl">
+              <p className="text-sm text-indigo-900 font-medium mb-3 text-center">
+                You are currently logged in as <span className="font-bold">{user.email}</span>
+              </p>
+              <button 
+                onClick={() => navigate('/dashboard')}
+                className="w-full py-3 bg-white border border-indigo-200 text-indigo-600 rounded-xl font-bold text-sm hover:bg-indigo-50 transition-all flex items-center justify-center gap-2"
+              >
+                <LayoutDashboard className="w-4 h-4" />
+                Go to Dashboard
+              </button>
+              <div className="relative my-6">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-slate-200"></div>
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="bg-white px-2 text-slate-400 font-bold tracking-wider">Or sign in with another account</span>
+                </div>
+              </div>
+            </div>
+          )}
+
           <form onSubmit={handleLogin} className="space-y-6">
             {error && (
               <div className="p-3 bg-rose-50 border border-rose-100 text-rose-600 text-sm rounded-lg">

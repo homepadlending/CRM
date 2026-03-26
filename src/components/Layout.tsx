@@ -22,7 +22,7 @@ import { cn } from '@/lib/utils';
 import { supabase } from '@/lib/supabase';
 
 const navigation = [
-  { name: 'Dashboard', href: '/', icon: LayoutDashboard },
+  { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
   { name: 'Leads', href: '/leads', icon: BarChart3 },
   { name: 'Applications', href: '/applications', icon: ClipboardList },
   { name: 'Loans', href: '/loans', icon: Briefcase },
