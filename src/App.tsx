@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { useAuth } from '@/hooks/useAuth';
 import Layout from '@/components/Layout';
 import ProtectedRoute from '@/components/ProtectedRoute';
+import { AlertCircle, RefreshCw } from 'lucide-react';
 
 // Pages
 import Dashboard from '@/pages/Dashboard';
@@ -23,7 +24,30 @@ import Login from '@/pages/Login';
 import Signup from '@/pages/Signup';
 
 export default function App() {
-  const { user, loading } = useAuth();
+  const { user, loading, error } = useAuth();
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-50 p-4">
+        <div className="max-w-md w-full bg-white p-8 rounded-2xl shadow-sm border border-slate-200 text-center">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-rose-50 rounded-2xl mb-6">
+            <AlertCircle className="w-8 h-8 text-rose-600" />
+          </div>
+          <h1 className="text-xl font-bold text-slate-900 mb-2">Configuration Error</h1>
+          <p className="text-slate-500 text-sm mb-8 leading-relaxed">
+            {error}
+          </p>
+          <button 
+            onClick={() => window.location.reload()}
+            className="w-full py-3 bg-indigo-600 text-white rounded-xl font-bold text-sm hover:bg-indigo-700 transition-all flex items-center justify-center gap-2"
+          >
+            <RefreshCw className="w-4 h-4" />
+            Retry Connection
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   if (loading) {
     return (
