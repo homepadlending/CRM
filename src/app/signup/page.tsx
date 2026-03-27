@@ -150,7 +150,7 @@ export default function Signup() {
         </div>
         
         <p className="text-center text-xs text-slate-400 mt-8">
-          &copy; 2026 MVP. All rights reserved.
+          &copy; 2026 LendingFlow CRM. All rights reserved.
         </p>
       </div>
     </div>

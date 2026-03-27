@@ -11,7 +11,7 @@ export function useAuth() {
 
   useEffect(() => {
     if (!isSupabaseConfigured || !supabase) {
-      setError('Supabase environment variables are missing. Please add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY to your environment.');
+      setError('Supabase environment variables are missing. Please add NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY to your environment.');
       setLoading(false);
       return;
     }

@@ -5,8 +5,8 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "MVP",
-  description: "A modern, high-performance CRM for small-to-mid-sized teams, featuring pipeline management, lead tracking, and advanced analytics.",
+  title: "LendingFlow CRM",
+  description: "A modern, high-performance CRM for mortgage and lending professionals, featuring pipeline management, lead tracking, and advanced analytics.",
 };
 
 export default function RootLayout({

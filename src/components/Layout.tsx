@@ -63,7 +63,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-200">
                 <Briefcase className="w-6 h-6 text-white" />
               </div>
-              <span className="text-2xl font-black text-slate-900 tracking-tight">MVP</span>
+              <span className="text-2xl font-black text-slate-900 tracking-tight">LendingFlow</span>
             </div>
             <button 
               onClick={() => setSidebarOpen(false)}
@@ -100,7 +100,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-200">
               <Briefcase className="w-6 h-6 text-white" />
             </div>
-            <span className="text-2xl font-black text-slate-900 tracking-tight">MVP</span>
+            <span className="text-2xl font-black text-slate-900 tracking-tight">LendingFlow</span>
           </div>
         </div>
         <nav className="flex-1 px-4 space-y-1.5 overflow-y-auto">
