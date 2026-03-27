@@ -32,12 +32,30 @@ CREATE TABLE campaigns (
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- 3. Agents (Referral Partners / Real Estate Agents)
+-- 3. Companies (Referral Partner Firms / Brokerages)
+CREATE TABLE companies (
+  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  name TEXT NOT NULL,
+  type TEXT, -- 'Real Estate', 'Insurance', 'Financial Planning', etc.
+  website TEXT,
+  phone TEXT,
+  address TEXT,
+  city TEXT,
+  state TEXT,
+  zip TEXT,
+  notes TEXT,
+  owner_id UUID REFERENCES profiles(id),
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- 4. Agents (Referral Partners / Real Estate Agents)
 CREATE TABLE agents (
   id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
   first_name TEXT NOT NULL,
   last_name TEXT NOT NULL,
-  brokerage TEXT,
+  company_id UUID REFERENCES companies(id) ON DELETE SET NULL,
+  brokerage TEXT, -- Legacy field, can be used for quick entry
   phone TEXT,
   email TEXT,
   city TEXT,
@@ -204,6 +222,9 @@ CREATE POLICY "Allow all for authenticated" ON campaigns FOR ALL USING (auth.rol
 
 ALTER TABLE agents ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Allow all for authenticated" ON agents FOR ALL USING (auth.role() = 'authenticated');
+
+ALTER TABLE companies ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Allow all for authenticated" ON companies FOR ALL USING (auth.role() = 'authenticated');
 
 ALTER TABLE leads ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Allow all for authenticated" ON leads FOR ALL USING (auth.role() = 'authenticated');

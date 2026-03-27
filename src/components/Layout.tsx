@@ -1,5 +1,8 @@
+"use client";
+
 import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { 
   LayoutDashboard, 
   Users, 
@@ -37,7 +40,7 @@ const navigation = [
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = React.useState(false);
-  const location = useLocation();
+  const pathname = usePathname();
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -73,16 +76,16 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             {navigation.map((item) => (
               <Link
                 key={item.name}
-                to={item.href}
+                href={item.href}
                 className={cn(
                   "flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition-all duration-200",
-                  location.pathname === item.href
+                  pathname === item.href
                     ? "bg-indigo-600 text-white shadow-lg shadow-indigo-100"
                     : "text-slate-500 hover:bg-slate-50 hover:text-slate-900"
                 )}
                 onClick={() => setSidebarOpen(false)}
               >
-                <item.icon className={cn("w-5 h-5", location.pathname === item.href ? "text-white" : "text-slate-400")} />
+                <item.icon className={cn("w-5 h-5", pathname === item.href ? "text-white" : "text-slate-400")} />
                 {item.name}
               </Link>
             ))}
@@ -104,17 +107,17 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           {navigation.map((item) => (
             <Link
               key={item.name}
-              to={item.href}
+              href={item.href}
               className={cn(
                 "flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition-all duration-200 group",
-                location.pathname === item.href
+                pathname === item.href
                   ? "bg-indigo-600 text-white shadow-lg shadow-indigo-100"
                   : "text-slate-500 hover:bg-slate-50 hover:text-slate-900"
               )}
             >
               <item.icon className={cn(
                 "w-5 h-5 transition-colors",
-                location.pathname === item.href ? "text-white" : "text-slate-400 group-hover:text-slate-600"
+                pathname === item.href ? "text-white" : "text-slate-400 group-hover:text-slate-600"
               )} />
               {item.name}
             </Link>

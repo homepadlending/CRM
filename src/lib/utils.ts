@@ -12,7 +12,8 @@ export function formatCurrency(amount: number) {
   }).format(amount);
 }
 
-export function formatDate(date: string | Date) {
+export function formatDate(date: string | Date | null | undefined) {
+  if (!date) return '-';
   return new Date(date).toLocaleDateString('en-US', {
     month: 'short',
     day: 'numeric',
