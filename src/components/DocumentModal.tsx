@@ -1,18 +1,19 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Modal from './Modal';
 import { Document } from '@/types';
-import { createDocument } from '@/lib/services';
+import { createDocument, updateDocument } from '@/lib/services';
 import { useAuth } from '@/hooks/useAuth';
 
 interface DocumentModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
+  document?: Document;
 }
 
-const DocumentModal: React.FC<DocumentModalProps> = ({ isOpen, onClose, onSuccess }) => {
+const DocumentModal: React.FC<DocumentModalProps> = ({ isOpen, onClose, onSuccess, document }) => {
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState<Partial<Document>>({
@@ -23,13 +24,37 @@ const DocumentModal: React.FC<DocumentModalProps> = ({ isOpen, onClose, onSucces
     file_url: 'https://example.com/placeholder.pdf', // Placeholder for real upload
   });
 
+  useEffect(() => {
+    if (document) {
+      setFormData({
+        name: document.name || '',
+        category: document.category || 'borrower',
+        type: document.type || 'PDF',
+        size: document.size || '0 KB',
+        file_url: document.file_url || 'https://example.com/placeholder.pdf',
+      });
+    } else {
+      setFormData({
+        name: '',
+        category: 'borrower',
+        type: 'PDF',
+        size: '0 KB',
+        file_url: 'https://example.com/placeholder.pdf',
+      });
+    }
+  }, [document, isOpen]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
 
     setLoading(true);
     try {
-      await createDocument({ ...formData, owner_id: user.id });
+      if (document) {
+        await updateDocument(document.id, formData);
+      } else {
+        await createDocument({ ...formData, owner_id: user.id });
+      }
       onSuccess();
       onClose();
     } catch (error) {
@@ -41,7 +66,7 @@ const DocumentModal: React.FC<DocumentModalProps> = ({ isOpen, onClose, onSucces
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Upload New Document">
+    <Modal isOpen={isOpen} onClose={onClose} title={document ? "Edit Document" : "Upload New Document"}>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="space-y-2">
           <label className="text-sm font-medium text-slate-700">Document Name</label>

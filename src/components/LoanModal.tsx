@@ -3,16 +3,17 @@
 import React, { useState, useEffect } from 'react';
 import Modal from './Modal';
 import { Loan } from '@/types';
-import { createLoan } from '@/lib/services';
+import { createLoan, updateLoan } from '@/lib/services';
 import { useAuth } from '@/hooks/useAuth';
 
 interface LoanModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
+  loan?: Loan;
 }
 
-export default function LoanModal({ isOpen, onClose, onSuccess }: LoanModalProps) {
+export default function LoanModal({ isOpen, onClose, onSuccess, loan }: LoanModalProps) {
   const { user } = useAuth();
   const [formData, setFormData] = useState<Partial<Loan>>({
     borrower_name: '',
@@ -25,12 +26,40 @@ export default function LoanModal({ isOpen, onClose, onSuccess }: LoanModalProps
   });
   const [loading, setLoading] = useState(false);
 
+  useEffect(() => {
+    if (loan) {
+      setFormData({
+        borrower_name: loan.borrower_name || '',
+        loan_amount: loan.loan_amount || 0,
+        loan_type: loan.loan_type || 'Conventional',
+        status: loan.status || 'New',
+        interest_rate: loan.interest_rate || 6.5,
+        property_address: loan.property_address || '',
+        closing_date: loan.closing_date ? loan.closing_date.split('T')[0] : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+      });
+    } else {
+      setFormData({
+        borrower_name: '',
+        loan_amount: 0,
+        loan_type: 'Conventional',
+        status: 'New',
+        interest_rate: 6.5,
+        property_address: '',
+        closing_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+      });
+    }
+  }, [loan, isOpen]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
     setLoading(true);
     try {
-      await createLoan({ ...formData, owner_id: user.id });
+      if (loan) {
+        await updateLoan(loan.id, formData);
+      } else {
+        await createLoan({ ...formData, owner_id: user.id });
+      }
       onSuccess();
       onClose();
     } catch (error) {
@@ -45,7 +74,7 @@ export default function LoanModal({ isOpen, onClose, onSuccess }: LoanModalProps
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title="New Loan Application"
+      title={loan ? "Edit Loan Application" : "New Loan Application"}
     >
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="space-y-2">
@@ -66,7 +95,7 @@ export default function LoanModal({ isOpen, onClose, onSuccess }: LoanModalProps
             <input
               required
               type="number"
-              value={formData.loan_amount || ''}
+              value={formData.loan_amount ?? ''}
               onChange={(e) => setFormData({ ...formData, loan_amount: Number(e.target.value) })}
               className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl text-sm font-bold focus:bg-white focus:ring-2 focus:ring-indigo-500 transition-all"
               placeholder="450000"
@@ -78,7 +107,7 @@ export default function LoanModal({ isOpen, onClose, onSuccess }: LoanModalProps
               required
               type="number"
               step="0.125"
-              value={formData.interest_rate || ''}
+              value={formData.interest_rate ?? ''}
               onChange={(e) => setFormData({ ...formData, interest_rate: Number(e.target.value) })}
               className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl text-sm font-bold focus:bg-white focus:ring-2 focus:ring-indigo-500 transition-all"
               placeholder="6.5"

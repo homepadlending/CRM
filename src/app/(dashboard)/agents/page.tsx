@@ -16,13 +16,15 @@ import {
   Download,
   Star,
   Building2,
-  MapPin
+  MapPin,
+  Edit2,
+  Trash2
 } from 'lucide-react';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import { Agent } from '@/types';
 import { cn, formatDate } from '@/lib/utils';
-import { getAgents } from '@/lib/services';
+import { getAgents, deleteAgent } from '@/lib/services';
 import AgentModal from '@/components/AgentModal';
 
 export default function Agents() {
@@ -30,6 +32,7 @@ export default function Agents() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedAgent, setSelectedAgent] = useState<Agent | undefined>();
 
   useEffect(() => {
     fetchAgents();
@@ -46,6 +49,17 @@ export default function Agents() {
       setLoading(false);
     }
   }
+
+  const handleDelete = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this agent?')) return;
+    try {
+      await deleteAgent(id);
+      fetchAgents();
+    } catch (err) {
+      console.error('Error deleting agent:', err);
+      alert('Failed to delete agent.');
+    }
+  };
 
   const filteredAgents = agents.filter(agent => 
     `${agent.first_name} ${agent.last_name}`.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -71,7 +85,10 @@ export default function Agents() {
             Export
           </button>
           <button 
-            onClick={() => setIsModalOpen(true)}
+            onClick={() => {
+              setSelectedAgent(undefined);
+              setIsModalOpen(true);
+            }}
             className="flex items-center gap-2 px-5 py-2.5 bg-indigo-600 rounded-xl text-sm font-bold text-white hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-200"
           >
             <Plus className="w-4 h-4" />
@@ -176,11 +193,20 @@ export default function Agents() {
                     </td>
                     <td className="px-6 py-5 text-right">
                       <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <button className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all">
-                          <Mail className="w-4 h-4" />
+                        <button 
+                          onClick={() => {
+                            setSelectedAgent(agent);
+                            setIsModalOpen(true);
+                          }}
+                          className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all"
+                        >
+                          <Edit2 className="w-4 h-4" />
                         </button>
-                        <button className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all">
-                          <Phone className="w-4 h-4" />
+                        <button 
+                          onClick={() => handleDelete(agent.id)}
+                          className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all"
+                        >
+                          <Trash2 className="w-4 h-4" />
                         </button>
                         <button className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-all">
                           <ChevronRight className="w-4 h-4" />
@@ -197,8 +223,12 @@ export default function Agents() {
 
       <AgentModal 
         isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        onClose={() => {
+          setIsModalOpen(false);
+          setSelectedAgent(undefined);
+        }}
         onSuccess={fetchAgents}
+        agent={selectedAgent}
       />
     </div>
   );

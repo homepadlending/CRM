@@ -16,18 +16,23 @@ import {
   Download,
   Star,
   DollarSign,
-  Calendar
+  Calendar,
+  Edit2,
+  Trash2
 } from 'lucide-react';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import { ClosedClient } from '@/types';
 import { cn, formatDate } from '@/lib/utils';
-import { getClosedClients } from '@/lib/services';
+import { getClosedClients, deleteClosedClient } from '@/lib/services';
+import ClosedClientModal from '@/components/ClosedClientModal';
 
 export default function ClosedClients() {
   const [clients, setClients] = useState<ClosedClient[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedClient, setSelectedClient] = useState<ClosedClient | undefined>();
 
   useEffect(() => {
     fetchClients();
@@ -45,6 +50,17 @@ export default function ClosedClients() {
     }
   }
 
+  const handleDelete = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this closed client record?')) return;
+    try {
+      await deleteClosedClient(id);
+      fetchClients();
+    } catch (err) {
+      console.error('Error deleting closed client:', err);
+      alert('Failed to delete closed client.');
+    }
+  };
+
   const filteredClients = clients.filter(client => 
     client.client_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     client.agent_name?.toLowerCase().includes(searchTerm.toLowerCase())
@@ -61,6 +77,16 @@ export default function ClosedClients() {
           <button className="flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-700 hover:bg-slate-50 transition-all shadow-sm">
             <Download className="w-4 h-4" />
             Export
+          </button>
+          <button 
+            onClick={() => {
+              setSelectedClient(undefined);
+              setIsModalOpen(true);
+            }}
+            className="flex items-center gap-2 px-5 py-2.5 bg-indigo-600 rounded-xl text-sm font-bold text-white hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-200"
+          >
+            <Plus className="w-4 h-4" />
+            Add Client
           </button>
         </div>
       </div>
@@ -161,8 +187,20 @@ export default function ClosedClients() {
                     </td>
                     <td className="px-6 py-5 text-right">
                       <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <button className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all">
-                          <Mail className="w-4 h-4" />
+                        <button 
+                          onClick={() => {
+                            setSelectedClient(client);
+                            setIsModalOpen(true);
+                          }}
+                          className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all"
+                        >
+                          <Edit2 className="w-4 h-4" />
+                        </button>
+                        <button 
+                          onClick={() => handleDelete(client.id)}
+                          className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all"
+                        >
+                          <Trash2 className="w-4 h-4" />
                         </button>
                         <button className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-all">
                           <ChevronRight className="w-4 h-4" />
@@ -176,6 +214,15 @@ export default function ClosedClients() {
           </table>
         </div>
       </div>
+      <ClosedClientModal 
+        isOpen={isModalOpen}
+        onClose={() => {
+          setIsModalOpen(false);
+          setSelectedClient(undefined);
+        }}
+        onSuccess={fetchClients}
+        client={selectedClient}
+      />
     </div>
   );
 }

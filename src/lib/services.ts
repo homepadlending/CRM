@@ -83,6 +83,25 @@ export const createAgent = async (agent: Partial<Agent>) => {
   return data as Agent;
 };
 
+export const updateAgent = async (id: string, updates: Partial<Agent>) => {
+  const { data, error } = await supabase
+    .from('agents')
+    .update(updates)
+    .eq('id', id)
+    .select()
+    .single();
+  if (error) throw error;
+  return data as Agent;
+};
+
+export const deleteAgent = async (id: string) => {
+  const { error } = await supabase
+    .from('agents')
+    .delete()
+    .eq('id', id);
+  if (error) throw error;
+};
+
 // --- Loans ---
 export const getLoans = async () => {
   const { data, error } = await supabase
@@ -101,6 +120,25 @@ export const createLoan = async (loan: Partial<Loan>) => {
     .single();
   if (error) throw error;
   return data as Loan;
+};
+
+export const updateLoan = async (id: string, updates: Partial<Loan>) => {
+  const { data, error } = await supabase
+    .from('loans')
+    .update(updates)
+    .eq('id', id)
+    .select()
+    .single();
+  if (error) throw error;
+  return data as Loan;
+};
+
+export const deleteLoan = async (id: string) => {
+  const { error } = await supabase
+    .from('loans')
+    .delete()
+    .eq('id', id);
+  if (error) throw error;
 };
 
 // --- Tasks ---
@@ -132,6 +170,14 @@ export const updateTask = async (id: string, updates: Partial<Task>) => {
     .single();
   if (error) throw error;
   return data as Task;
+};
+
+export const deleteTask = async (id: string) => {
+  const { error } = await supabase
+    .from('tasks')
+    .delete()
+    .eq('id', id);
+  if (error) throw error;
 };
 
 // --- Activities ---
@@ -175,6 +221,25 @@ export const createApplication = async (application: Partial<Application>) => {
   return data as Application;
 };
 
+export const updateApplication = async (id: string, updates: Partial<Application>) => {
+  const { data, error } = await supabase
+    .from('applications')
+    .update(updates)
+    .eq('id', id)
+    .select()
+    .single();
+  if (error) throw error;
+  return data as Application;
+};
+
+export const deleteApplication = async (id: string) => {
+  const { error } = await supabase
+    .from('applications')
+    .delete()
+    .eq('id', id);
+  if (error) throw error;
+};
+
 // --- Closed Clients ---
 export const getClosedClients = async () => {
   const { data, error } = await supabase
@@ -183,6 +248,35 @@ export const getClosedClients = async () => {
     .order('closed_at', { ascending: false });
   if (error) throw error;
   return data as ClosedClient[];
+};
+
+export const createClosedClient = async (client: Partial<ClosedClient>) => {
+  const { data, error } = await supabase
+    .from('closed_clients')
+    .insert(client)
+    .select()
+    .single();
+  if (error) throw error;
+  return data as ClosedClient;
+};
+
+export const updateClosedClient = async (id: string, updates: Partial<ClosedClient>) => {
+  const { data, error } = await supabase
+    .from('closed_clients')
+    .update(updates)
+    .eq('id', id)
+    .select()
+    .single();
+  if (error) throw error;
+  return data as ClosedClient;
+};
+
+export const deleteClosedClient = async (id: string) => {
+  const { error } = await supabase
+    .from('closed_clients')
+    .delete()
+    .eq('id', id);
+  if (error) throw error;
 };
 
 // --- Campaigns ---
@@ -211,6 +305,17 @@ export const createCampaign = async (campaign: Partial<Campaign>) => {
   const { data, error } = await supabase
     .from('campaigns')
     .insert(campaign)
+    .select()
+    .single();
+  if (error) throw error;
+  return data as Campaign;
+};
+
+export const updateCampaign = async (id: string, updates: Partial<Campaign>) => {
+  const { data, error } = await supabase
+    .from('campaigns')
+    .update(updates)
+    .eq('id', id)
     .select()
     .single();
   if (error) throw error;
@@ -251,6 +356,17 @@ export const deleteDocument = async (id: string) => {
     .delete()
     .eq('id', id);
   if (error) throw error;
+};
+
+export const updateDocument = async (id: string, updates: Partial<Document>) => {
+  const { data, error } = await supabase
+    .from('documents')
+    .update(updates)
+    .eq('id', id)
+    .select()
+    .single();
+  if (error) throw error;
+  return data as Document;
 };
 
 // --- Companies ---

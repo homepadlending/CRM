@@ -1,18 +1,19 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Modal from './Modal';
 import { Task } from '@/types';
-import { createTask } from '@/lib/services';
+import { createTask, updateTask } from '@/lib/services';
 import { useAuth } from '@/hooks/useAuth';
 
 interface TaskModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
+  task?: Task;
 }
 
-export default function TaskModal({ isOpen, onClose, onSuccess }: TaskModalProps) {
+export default function TaskModal({ isOpen, onClose, onSuccess, task }: TaskModalProps) {
   const { user } = useAuth();
   const [formData, setFormData] = useState<Partial<Task>>({
     title: '',
@@ -23,12 +24,36 @@ export default function TaskModal({ isOpen, onClose, onSuccess }: TaskModalProps
   });
   const [loading, setLoading] = useState(false);
 
+  useEffect(() => {
+    if (task) {
+      setFormData({
+        title: task.title || '',
+        description: task.description || '',
+        status: task.status || 'Pending',
+        priority: task.priority || 'Medium',
+        due_date: task.due_date ? task.due_date.split('T')[0] : new Date().toISOString().split('T')[0]
+      });
+    } else {
+      setFormData({
+        title: '',
+        description: '',
+        status: 'Pending',
+        priority: 'Medium',
+        due_date: new Date().toISOString().split('T')[0]
+      });
+    }
+  }, [task, isOpen]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
     setLoading(true);
     try {
-      await createTask({ ...formData, owner_id: user.id });
+      if (task) {
+        await updateTask(task.id, formData);
+      } else {
+        await createTask({ ...formData, owner_id: user.id });
+      }
       onSuccess();
       onClose();
     } catch (error) {
@@ -43,7 +68,7 @@ export default function TaskModal({ isOpen, onClose, onSuccess }: TaskModalProps
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title="Create New Task"
+      title={task ? "Edit Task" : "Create New Task"}
     >
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="space-y-2">

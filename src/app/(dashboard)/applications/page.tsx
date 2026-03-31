@@ -16,18 +16,23 @@ import {
   Download,
   Star,
   CheckCircle2,
-  AlertCircle
+  AlertCircle,
+  Edit2,
+  Trash2
 } from 'lucide-react';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import { Application } from '@/types';
 import { cn, formatDate } from '@/lib/utils';
-import { getApplications } from '@/lib/services';
+import { getApplications, deleteApplication } from '@/lib/services';
+import ApplicationModal from '@/components/ApplicationModal';
 
 export default function Applications() {
   const [applications, setApplications] = useState<Application[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedApplication, setSelectedApplication] = useState<Application | undefined>();
 
   useEffect(() => {
     fetchApplications();
@@ -44,6 +49,17 @@ export default function Applications() {
       setLoading(false);
     }
   }
+
+  const handleDelete = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this application?')) return;
+    try {
+      await deleteApplication(id);
+      fetchApplications();
+    } catch (err) {
+      console.error('Error deleting application:', err);
+      alert('Failed to delete application.');
+    }
+  };
 
   const filteredApplications = applications.filter(app => 
     app.borrower_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -62,7 +78,13 @@ export default function Applications() {
             <Download className="w-4 h-4" />
             Export
           </button>
-          <button className="flex items-center gap-2 px-5 py-2.5 bg-indigo-600 rounded-xl text-sm font-bold text-white hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-200">
+          <button 
+            onClick={() => {
+              setSelectedApplication(undefined);
+              setIsModalOpen(true);
+            }}
+            className="flex items-center gap-2 px-5 py-2.5 bg-indigo-600 rounded-xl text-sm font-bold text-white hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-200"
+          >
             <Plus className="w-4 h-4" />
             New Application
           </button>
@@ -175,8 +197,20 @@ export default function Applications() {
                     </td>
                     <td className="px-6 py-5 text-right">
                       <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <button className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all">
-                          <CheckCircle2 className="w-4 h-4" />
+                        <button 
+                          onClick={() => {
+                            setSelectedApplication(app);
+                            setIsModalOpen(true);
+                          }}
+                          className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all"
+                        >
+                          <Edit2 className="w-4 h-4" />
+                        </button>
+                        <button 
+                          onClick={() => handleDelete(app.id)}
+                          className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all"
+                        >
+                          <Trash2 className="w-4 h-4" />
                         </button>
                         <button className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-all">
                           <ChevronRight className="w-4 h-4" />
@@ -190,6 +224,15 @@ export default function Applications() {
           </table>
         </div>
       </div>
+      <ApplicationModal 
+        isOpen={isModalOpen}
+        onClose={() => {
+          setIsModalOpen(false);
+          setSelectedApplication(undefined);
+        }}
+        onSuccess={fetchApplications}
+        application={selectedApplication}
+      />
     </div>
   );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 import { Briefcase, Mail, Lock, ArrowRight, LayoutDashboard, AlertCircle } from 'lucide-react';
 import Link from 'next/link';
@@ -12,8 +12,13 @@ export default function Login() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isMounted, setIsMounted] = useState(false);
   const router = useRouter();
   const { user } = useAuth();
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   if (!isSupabaseConfigured) {
     return (
@@ -67,7 +72,7 @@ export default function Login() {
         </div>
 
         <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-200">
-          {user && (
+          {isMounted && user && (
             <div className="mb-8 p-4 bg-indigo-50 border border-indigo-100 rounded-xl">
               <p className="text-sm text-indigo-900 font-medium mb-3 text-center">
                 You are currently logged in as <span className="font-bold">{user.email}</span>
@@ -107,6 +112,7 @@ export default function Login() {
                   onChange={(e) => setEmail(e.target.value)}
                   className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
                   placeholder="ryan@thehomepad.com"
+                  suppressHydrationWarning
                 />
               </div>
             </div>
@@ -125,6 +131,7 @@ export default function Login() {
                   onChange={(e) => setPassword(e.target.value)}
                   className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
                   placeholder="••••••••"
+                  suppressHydrationWarning
                 />
               </div>
             </div>
@@ -133,6 +140,7 @@ export default function Login() {
               type="submit"
               disabled={loading}
               className="w-full py-3 bg-indigo-600 text-white rounded-xl font-bold text-sm hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-100 flex items-center justify-center gap-2 group disabled:opacity-50"
+              suppressHydrationWarning
             >
               {loading ? 'Signing in...' : 'Sign In'}
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />

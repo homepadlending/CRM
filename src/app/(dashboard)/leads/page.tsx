@@ -15,7 +15,9 @@ import {
   UserPlus,
   Download,
   Star,
-  AlertCircle
+  AlertCircle,
+  Edit2,
+  Trash2
 } from 'lucide-react';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
@@ -216,13 +218,13 @@ export default function Leads() {
                           onClick={() => handleEditLead(lead)}
                           className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all"
                         >
-                          <MoreVertical className="w-4 h-4" />
+                          <Edit2 className="w-4 h-4" />
                         </button>
                         <button 
                           onClick={() => handleDeleteLead(lead.id)}
                           className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all"
                         >
-                          <AlertCircle className="w-4 h-4" />
+                          <Trash2 className="w-4 h-4" />
                         </button>
                       </div>
                     </td>

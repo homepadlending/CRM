@@ -24,13 +24,14 @@ import { Campaign } from '@/types';
 import { cn, formatDate } from '@/lib/utils';
 import { getCampaigns, deleteCampaign } from '@/lib/services';
 import CampaignModal from '@/components/CampaignModal';
-import { Trash2 } from 'lucide-react';
+import { Trash2, Edit2 } from 'lucide-react';
 
 export default function Campaigns() {
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedCampaign, setSelectedCampaign] = useState<Campaign | undefined>();
 
   useEffect(() => {
     fetchCampaigns();
@@ -73,7 +74,10 @@ export default function Campaigns() {
         </div>
         <div className="flex items-center gap-3">
           <button 
-            onClick={() => setIsModalOpen(true)}
+            onClick={() => {
+              setSelectedCampaign(undefined);
+              setIsModalOpen(true);
+            }}
             className="flex items-center gap-2 px-5 py-2.5 bg-indigo-600 rounded-xl text-sm font-bold text-white hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-200"
           >
             <Plus className="w-4 h-4" />
@@ -189,6 +193,15 @@ export default function Campaigns() {
                     <td className="px-6 py-5 text-right">
                       <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                         <button 
+                          onClick={() => {
+                            setSelectedCampaign(campaign);
+                            setIsModalOpen(true);
+                          }}
+                          className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all"
+                        >
+                          <Edit2 className="w-4 h-4" />
+                        </button>
+                        <button 
                           onClick={() => handleDelete(campaign.id)}
                           className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all"
                         >
@@ -206,8 +219,12 @@ export default function Campaigns() {
 
       <CampaignModal 
         isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        onClose={() => {
+          setIsModalOpen(false);
+          setSelectedCampaign(undefined);
+        }}
         onSuccess={fetchCampaigns}
+        campaign={selectedCampaign}
       />
     </div>
   );

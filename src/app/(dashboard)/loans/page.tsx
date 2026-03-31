@@ -16,13 +16,15 @@ import {
   Download,
   Star,
   FileText,
-  Calendar
+  Calendar,
+  Edit2,
+  Trash2
 } from 'lucide-react';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import { Loan } from '@/types';
 import { cn, formatDate } from '@/lib/utils';
-import { getLoans } from '@/lib/services';
+import { getLoans, deleteLoan } from '@/lib/services';
 import LoanModal from '@/components/LoanModal';
 
 export default function Loans() {
@@ -30,6 +32,7 @@ export default function Loans() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedLoan, setSelectedLoan] = useState<Loan | undefined>();
 
   useEffect(() => {
     fetchLoans();
@@ -46,6 +49,17 @@ export default function Loans() {
       setLoading(false);
     }
   }
+
+  const handleDelete = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this loan?')) return;
+    try {
+      await deleteLoan(id);
+      fetchLoans();
+    } catch (err) {
+      console.error('Error deleting loan:', err);
+      alert('Failed to delete loan.');
+    }
+  };
 
   const filteredLoans = loans.filter(loan => 
     loan.borrower_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -71,7 +85,10 @@ export default function Loans() {
             Export
           </button>
           <button 
-            onClick={() => setIsModalOpen(true)}
+            onClick={() => {
+              setSelectedLoan(undefined);
+              setIsModalOpen(true);
+            }}
             className="flex items-center gap-2 px-5 py-2.5 bg-indigo-600 rounded-xl text-sm font-bold text-white hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-200"
           >
             <Plus className="w-4 h-4" />
@@ -184,11 +201,20 @@ export default function Loans() {
                     </td>
                     <td className="px-6 py-5 text-right">
                       <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <button className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all">
-                          <MoreVertical className="w-4 h-4" />
+                        <button 
+                          onClick={() => {
+                            setSelectedLoan(loan);
+                            setIsModalOpen(true);
+                          }}
+                          className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all"
+                        >
+                          <Edit2 className="w-4 h-4" />
                         </button>
-                        <button className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-all">
-                          <ChevronRight className="w-4 h-4" />
+                        <button 
+                          onClick={() => handleDelete(loan.id)}
+                          className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all"
+                        >
+                          <Trash2 className="w-4 h-4" />
                         </button>
                       </div>
                     </td>
@@ -202,8 +228,12 @@ export default function Loans() {
 
       <LoanModal 
         isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        onClose={() => {
+          setIsModalOpen(false);
+          setSelectedLoan(undefined);
+        }}
         onSuccess={fetchLoans}
+        loan={selectedLoan}
       />
     </div>
   );

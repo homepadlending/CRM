@@ -15,13 +15,15 @@ import {
   AlertCircle,
   Download,
   Star,
-  ListTodo
+  ListTodo,
+  Edit2,
+  Trash2
 } from 'lucide-react';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import { Task } from '@/types';
 import { cn, formatDate } from '@/lib/utils';
-import { getTasks, updateTask } from '@/lib/services';
+import { getTasks, updateTask, deleteTask } from '@/lib/services';
 import TaskModal from '@/components/TaskModal';
 
 export default function Tasks() {
@@ -29,6 +31,7 @@ export default function Tasks() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedTask, setSelectedTask] = useState<Task | undefined>();
 
   useEffect(() => {
     fetchTasks();
@@ -56,6 +59,17 @@ export default function Tasks() {
     }
   };
 
+  const handleDelete = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this task?')) return;
+    try {
+      await deleteTask(id);
+      fetchTasks();
+    } catch (err) {
+      console.error('Error deleting task:', err);
+      alert('Failed to delete task.');
+    }
+  };
+
   const filteredTasks = tasks.filter(task => 
     task.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     task.description?.toLowerCase().includes(searchTerm.toLowerCase())
@@ -70,7 +84,10 @@ export default function Tasks() {
         </div>
         <div className="flex items-center gap-3">
           <button 
-            onClick={() => setIsModalOpen(true)}
+            onClick={() => {
+              setSelectedTask(undefined);
+              setIsModalOpen(true);
+            }}
             className="flex items-center gap-2 px-5 py-2.5 bg-indigo-600 rounded-xl text-sm font-bold text-white hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-200"
           >
             <Plus className="w-4 h-4" />
@@ -188,8 +205,20 @@ export default function Tasks() {
                     </td>
                     <td className="px-6 py-5 text-right">
                       <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <button className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all">
-                          <MoreVertical className="w-4 h-4" />
+                        <button 
+                          onClick={() => {
+                            setSelectedTask(task);
+                            setIsModalOpen(true);
+                          }}
+                          className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all"
+                        >
+                          <Edit2 className="w-4 h-4" />
+                        </button>
+                        <button 
+                          onClick={() => handleDelete(task.id)}
+                          className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all"
+                        >
+                          <Trash2 className="w-4 h-4" />
                         </button>
                       </div>
                     </td>
@@ -203,8 +232,12 @@ export default function Tasks() {
 
       <TaskModal 
         isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        onClose={() => {
+          setIsModalOpen(false);
+          setSelectedTask(undefined);
+        }}
         onSuccess={fetchTasks}
+        task={selectedTask}
       />
     </div>
   );

@@ -3,16 +3,17 @@
 import React, { useState, useEffect } from 'react';
 import Modal from './Modal';
 import { Agent, Company } from '@/types';
-import { createAgent, getCompanies } from '@/lib/services';
+import { createAgent, updateAgent, getCompanies } from '@/lib/services';
 import { useAuth } from '@/hooks/useAuth';
 
 interface AgentModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
+  agent?: Agent;
 }
 
-export default function AgentModal({ isOpen, onClose, onSuccess }: AgentModalProps) {
+export default function AgentModal({ isOpen, onClose, onSuccess, agent }: AgentModalProps) {
   const { user } = useAuth();
   const [companies, setCompanies] = useState<Company[]>([]);
   const [formData, setFormData] = useState<Partial<Agent>>({
@@ -31,6 +32,30 @@ export default function AgentModal({ isOpen, onClose, onSuccess }: AgentModalPro
       fetchCompanies();
     }
   }, [isOpen]);
+
+  useEffect(() => {
+    if (agent) {
+      setFormData({
+        first_name: agent.first_name || '',
+        last_name: agent.last_name || '',
+        email: agent.email || '',
+        phone: agent.phone || '',
+        company_id: agent.company_id || '',
+        brokerage: agent.brokerage || '',
+        relationship_status: agent.relationship_status || 'active',
+      });
+    } else {
+      setFormData({
+        first_name: '',
+        last_name: '',
+        email: '',
+        phone: '',
+        company_id: '',
+        brokerage: '',
+        relationship_status: 'active',
+      });
+    }
+  }, [agent, isOpen]);
 
   const fetchCompanies = async () => {
     try {
@@ -53,7 +78,12 @@ export default function AgentModal({ isOpen, onClose, onSuccess }: AgentModalPro
         owner_id: user.id,
         brokerage: selectedCompany ? selectedCompany.name : formData.brokerage
       };
-      await createAgent(finalData);
+      
+      if (agent) {
+        await updateAgent(agent.id, finalData);
+      } else {
+        await createAgent(finalData);
+      }
       onSuccess();
       onClose();
     } catch (error) {
@@ -68,7 +98,7 @@ export default function AgentModal({ isOpen, onClose, onSuccess }: AgentModalPro
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title="Add New Agent Partner"
+      title={agent ? "Edit Agent Partner" : "Add New Agent Partner"}
     >
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="grid grid-cols-2 gap-4">

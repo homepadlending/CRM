@@ -27,6 +27,8 @@ import { supabase } from '@/lib/supabase';
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
   { name: 'Leads', href: '/leads', icon: BarChart3 },
+  { name: 'Contacts', href: '/contacts', icon: Users },
+  { name: 'Companies', href: '/companies', icon: Building2 },
   { name: 'Applications', href: '/applications', icon: ClipboardList },
   { name: 'Loans', href: '/loans', icon: Briefcase },
   { name: 'Closed Clients', href: '/closed-clients', icon: Users },

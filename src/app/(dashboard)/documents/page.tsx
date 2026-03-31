@@ -16,7 +16,8 @@ import {
   Download,
   Star,
   Upload,
-  ExternalLink
+  ExternalLink,
+  Edit2
 } from 'lucide-react';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
@@ -31,6 +32,7 @@ export default function Documents() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedDocument, setSelectedDocument] = useState<Document | undefined>();
 
   useEffect(() => {
     fetchDocuments();
@@ -73,7 +75,10 @@ export default function Documents() {
         </div>
         <div className="flex items-center gap-3">
           <button 
-            onClick={() => setIsModalOpen(true)}
+            onClick={() => {
+              setSelectedDocument(undefined);
+              setIsModalOpen(true);
+            }}
             className="flex items-center gap-2 px-5 py-2.5 bg-indigo-600 rounded-xl text-sm font-bold text-white hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-200"
           >
             <Upload className="w-4 h-4" />
@@ -177,6 +182,15 @@ export default function Documents() {
                     </td>
                     <td className="px-6 py-5 text-right">
                       <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button 
+                          onClick={() => {
+                            setSelectedDocument(doc);
+                            setIsModalOpen(true);
+                          }}
+                          className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all"
+                        >
+                          <Edit2 className="w-4 h-4" />
+                        </button>
                         <a 
                           href={doc.file_url} 
                           target="_blank" 
@@ -203,8 +217,12 @@ export default function Documents() {
 
       <DocumentModal 
         isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        onClose={() => {
+          setIsModalOpen(false);
+          setSelectedDocument(undefined);
+        }}
         onSuccess={fetchDocuments}
+        document={selectedDocument}
       />
     </div>
   );
